@@ -1,0 +1,59 @@
+version: '3'
+services:
+  # mysql:
+  #  image: docker.io/mysql:latest
+  #  container_name: mysql_test
+  #  ports:
+  #  - "3306:3306"
+  #  restart: always
+  #  volumes:
+  #   - ./volume-conf/example/sql:/docker-entrypoint-initdb.d/:ro
+  #   - ./volume-conf/example/conf:/root/
+  #   - /../../volume-data/example/:/data/
+  #  environment:
+  #  - MYSQL_ROOT_PASSWORD=123456
+  #  command:  ["/bin/sh", "-c", "cd /root/ && sh init_password.sh"]
+  #  networks:
+  #  - backend
+
+  # add other service
+  es:
+    image: elasticsearch:6.7.2
+    container_name: es-6.7.2
+    hostname: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    restart: always
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    #volumes:
+    #  - ./volume/es/data:/usr/share/elasticsearch/data:rw
+    environment:
+      - cluster.name=panda
+      - node.name=node-1
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+    networks:
+      - backend
+
+  redis:
+    image: redis:latest
+    container_name: redis_latest
+    hostname: redis
+    ports:
+      - "9979:6379"
+    restart: always
+    volumes:
+      - ./volume/redis/data:/data
+    command: redis-server --appendonly yes --requirepass 123456
+    networks:
+      - backend
+
+networks:
+  backend:
+    external: true
